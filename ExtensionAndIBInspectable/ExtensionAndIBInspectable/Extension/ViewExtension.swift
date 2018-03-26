@@ -1,9 +1,8 @@
 //
 //  ViewExtension.swift
-//  coinbidz
 //
 //  Created by datt on 03/01/18.
-//  Copyright © 2018 zaptechsolutions. All rights reserved.
+//  Copyright © 2018 datt. All rights reserved.
 //
 
 import UIKit
