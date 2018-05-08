@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C60D0FFB20A1B67E001B3ABF /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60D0FFA20A1B67E001B3ABF /* Utility.swift */; };
+		C60D0FFD20A1B6A4001B3ABF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C60D0FFC20A1B6A4001B3ABF /* Constants.swift */; };
 		C681A113206123BF002FE36F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C681A112206123BF002FE36F /* AppDelegate.swift */; };
 		C681A115206123BF002FE36F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C681A114206123BF002FE36F /* ViewController.swift */; };
 		C681A118206123BF002FE36F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C681A116206123BF002FE36F /* Main.storyboard */; };
@@ -26,6 +28,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C60D0FFA20A1B67E001B3ABF /* Utility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
+		C60D0FFC20A1B6A4001B3ABF /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		C681A10F206123BF002FE36F /* ExtensionAndIBInspectable.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ExtensionAndIBInspectable.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C681A112206123BF002FE36F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C681A114206123BF002FE36F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -84,6 +88,8 @@
 				C681A119206123BF002FE36F /* Assets.xcassets */,
 				C681A11B206123BF002FE36F /* LaunchScreen.storyboard */,
 				C681A11E206123BF002FE36F /* Info.plist */,
+				C60D0FFA20A1B67E001B3ABF /* Utility.swift */,
+				C60D0FFC20A1B6A4001B3ABF /* Constants.swift */,
 			);
 			path = ExtensionAndIBInspectable;
 			sourceTree = "<group>";
@@ -185,10 +191,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C60D0FFB20A1B67E001B3ABF /* Utility.swift in Sources */,
 				C681A13A206123F3002FE36F /* StringExtensions.swift in Sources */,
 				C681A131206123F3002FE36F /* PlaceholderTextView.swift in Sources */,
 				C681A133206123F3002FE36F /* DateExtensions.swift in Sources */,
 				C681A137206123F3002FE36F /* FloatExtensions.swift in Sources */,
+				C60D0FFD20A1B6A4001B3ABF /* Constants.swift in Sources */,
 				C681A139206123F3002FE36F /* OptionalExtensions.swift in Sources */,
 				C681A115206123BF002FE36F /* ViewController.swift in Sources */,
 				C681A113206123BF002FE36F /* AppDelegate.swift in Sources */,
