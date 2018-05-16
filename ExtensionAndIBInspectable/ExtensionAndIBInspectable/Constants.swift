@@ -5,18 +5,17 @@ import UIKit
 import Foundation
 
 extension UIColor {
-    static let defaultBlueColor = UIColor.init(red: 71.0/255.0, green: 122.0/255.0, blue: 164.0/255.0, alpha: 1.0)
-    static let lightBorderColor = UIColor(red: 204/255.0, green: 204/255.0, blue: 204/255.0, alpha: 1.0)
-    static let lightBlueViewBGColor = UIColor(red: 227/255.0, green: 238/255.0, blue: 254/255.0, alpha: 1.0)
-    static let blueLableBGColor = UIColor(red: 196/255.0, green: 219/255.0, blue: 255/255.0, alpha: 1.0)
+    class func defaultBlueColor() -> UIColor { return UIColor(r: 71, g: 122, b: 164) }
+    class func lightBorderColor() -> UIColor { return UIColor(r: 204, g: 204, b: 204) }
+    class func lightBlueViewBGColor() -> UIColor { return UIColor(r: 227, g: 238, b: 254) }
     
-    static let blackColor = UIColor.black
-    static let whiteColor = UIColor.white
-    static let lightGrayColor = UIColor.lightGray
-    static let grayColor = UIColor.gray
-    static let darkGrayColor = UIColor.darkGray
-    static let redColor = UIColor.red
-    static let clearColor = UIColor.clear
+    class func blackColor() -> UIColor { return UIColor.black }
+    class func whiteColor() -> UIColor { return UIColor.white }
+    class func lightGrayColor() -> UIColor { return UIColor.lightGray }
+    class func grayColor() -> UIColor { return UIColor.gray }
+    class func darkGrayColor() -> UIColor { return UIColor.darkGray }
+    class func redColor() -> UIColor { return UIColor.red }
+    class func clearColor() -> UIColor { return UIColor.clear }
 }
 
 

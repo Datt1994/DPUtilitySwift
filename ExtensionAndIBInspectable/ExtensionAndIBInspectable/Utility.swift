@@ -261,7 +261,7 @@ func setNavigationBar(viewController : UIViewController, strTitleName : String) 
     let titleDict: NSDictionary = [NSAttributedStringKey.foregroundColor: UIColor.whiteColor]
     viewController.navigationController?.navigationBar.titleTextAttributes = (titleDict as! [NSAttributedStringKey : Any])
     
-    viewController.navigationController?.navigationBar.tintColor = .whiteColor
+    viewController.navigationController?.navigationBar.tintColor = .whiteColor()
     
     viewController.navigationItem.title = strTitleName
     viewController.navigationItem.backBarButtonItem = UIBarButtonItem(title:"", style:.plain, target:nil, action:nil)
@@ -271,8 +271,8 @@ func setNavigationBar(viewController : UIViewController, strTitleName : String) 
 
 
 func setNavigation(){
-    UINavigationBar.appearance().barTintColor = .defaultBlueColor
-    UINavigationBar.appearance().tintColor = .whiteColor
+    UINavigationBar.appearance().barTintColor = .defaultBlueColor()
+    UINavigationBar.appearance().tintColor = .whiteColor()
     //    UINavigationBar.appearance().titleTextAttributes = [NSAttributedStringKey.foregroundColor:Constants.RGBColorCodes.cNavigationBarColor]
     UINavigationBar.appearance().isTranslucent = false
     //    UIApplication.shared.statusBarView?.backgroundColor = Constants.RGBColorCodes.defaultBlueColor
@@ -290,9 +290,9 @@ func setTabBarControllerNavigationBar(viewController : UIViewController, strTitl
     
     viewController.tabBarController?.navigationItem.backBarButtonItem = UIBarButtonItem(title:"", style:.plain, target:nil, action:nil)
 
-    viewController.tabBarController?.navigationController?.navigationBar.tintColor = .whiteColor
+    viewController.tabBarController?.navigationController?.navigationBar.tintColor = .whiteColor()
     viewController.tabBarController?.navigationItem.title = strTitleName
-    viewController.tabBarController?.navigationController?.navigationBar.backgroundColor = .defaultBlueColor
+    viewController.tabBarController?.navigationController?.navigationBar.backgroundColor = .defaultBlueColor()
     viewController.tabBarController?.navigationController?.navigationBar.isTranslucent = false
  
 }
