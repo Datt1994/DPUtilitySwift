@@ -1,12 +1,14 @@
 //
 //  ArrayExtensions.swift
+//  coinbidz
 //
 //  Created by datt on 03/01/18.
-//  Copyright © 2018 datt. All rights reserved.
+//  Copyright © 2018 zaptechsolutions. All rights reserved.
 //
 
 import UIKit
 // MARK: - Methods (Integer)
+
 public extension Array where Element: Numeric {
 	
 	///  : Sum of all elements in array.
@@ -14,7 +16,7 @@ public extension Array where Element: Numeric {
 	///		[1, 2, 3, 4, 5].sum() -> 15
 	///
 	/// - Returns: sum of the array's elements.
-	public func sum() -> Element {
+	func sum() -> Element {
         var total: Element = 0
         for i in 0..<count {
             total += self[i]
@@ -32,7 +34,7 @@ public extension Array where Element: FloatingPoint {
 	///		[1.2, 2.3, 4.5, 3.4, 4.5].average() = 3.18
 	///
 	/// - Returns: average of the array's elements.
-	public func average() -> Element {
+	func average() -> Element {
         guard !isEmpty else { return 0 }
         var total: Element = 0
         for i in 0..<count {
@@ -54,7 +56,7 @@ public extension Array {
 	///
 	/// - Parameter index: index of element.
 	/// - Returns: optional element (if exists).
-	public func item(at index: Int) -> Element? {
+	func item(at index: Int) -> Element? {
 		guard startIndex..<endIndex ~= index else { return nil }
 		return self[index]
 	}
@@ -65,7 +67,7 @@ public extension Array {
 	///		[].pop() // returns nil since the array is empty.
 	///
 	/// - Returns: last element in array (if applicable).
-	@discardableResult public mutating func pop() -> Element? {
+	@discardableResult mutating func pop() -> Element? {
 		return popLast()
 	}
 	
@@ -75,7 +77,7 @@ public extension Array {
 	///		["e", "l", "l", "o"].prepend("h") -> ["h", "e", "l", "l", "o"]
 	///
 	/// - Parameter newElement: element to insert.
-	public mutating func prepend(_ newElement: Element) {
+	mutating func prepend(_ newElement: Element) {
 		insert(newElement, at: 0)
 	}
 	
@@ -85,7 +87,7 @@ public extension Array {
 	///		["h", "e", "l", "l"].push("o") -> ["h", "e", "l", "l", "o"]
 	///
 	/// - Parameter newElement: element to insert.
-	public mutating func push(_ newElement: Element) {
+	mutating func push(_ newElement: Element) {
 		append(newElement)
 	}
 	
@@ -97,7 +99,7 @@ public extension Array {
 	/// - Parameters:
 	///   - index: index of first element.
 	///   - otherIndex: index of other element.
-	public mutating func safeSwap(from index: Int, to otherIndex: Int) {
+	mutating func safeSwap(from index: Int, to otherIndex: Int) {
 		guard index != otherIndex,
 			startIndex..<endIndex ~= index,
 			startIndex..<endIndex ~= otherIndex else { return }
@@ -112,7 +114,7 @@ public extension Array {
 	/// - Parameters:
 	///   - index: index of first element.
 	///   - otherIndex: index of other element.
-	public mutating func swap(from index: Int, to otherIndex: Int) {
+	mutating func swap(from index: Int, to otherIndex: Int) {
 		swapAt(index, otherIndex)
 	}
 	
@@ -122,7 +124,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: first index where the specified condition evaluates to true. (optional)
-	public func firstIndex(where condition: (Element) throws -> Bool) rethrows -> Int? {
+	func firstIndex(where condition: (Element) throws -> Bool) rethrows -> Int? {
 		for (index, value) in lazy.enumerated() {
 			if try condition(value) { return index }
 		}
@@ -135,7 +137,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: last index where the specified condition evaluates to true. (optional)
-	public func lastIndex(where condition: (Element) throws -> Bool) rethrows -> Int? {
+	func lastIndex(where condition: (Element) throws -> Bool) rethrows -> Int? {
 		for (index, value) in lazy.enumerated().reversed() {
 			if try condition(value) { return index }
 		}
@@ -148,7 +150,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: all indices where the specified condition evaluates to true. (optional)
-	public func indices(where condition: (Element) throws -> Bool) rethrows -> [Int]? {
+	func indices(where condition: (Element) throws -> Bool) rethrows -> [Int]? {
 		var indicies: [Int] = []
 		for (index, value) in lazy.enumerated() {
 			if try condition(value) { indicies.append(index) }
@@ -163,7 +165,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: true when all elements in the array match the specified condition.
-	public func all(matching condition: (Element) throws -> Bool) rethrows -> Bool {
+	func all(matching condition: (Element) throws -> Bool) rethrows -> Bool {
 		return try !contains { try !condition($0) }
 	}
 	
@@ -174,7 +176,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: true when no elements in the array match the specified condition.
-	public func none(matching condition: (Element) throws -> Bool) rethrows -> Bool {
+	func none(matching condition: (Element) throws -> Bool) rethrows -> Bool {
 		return try !contains { try condition($0) }
 	}
 	
@@ -184,7 +186,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: the last element in the array matching the specified condition. (optional)
-	public func last(where condition: (Element) throws -> Bool) rethrows -> Element? {
+	func last(where condition: (Element) throws -> Bool) rethrows -> Element? {
 		for element in reversed() {
 			if try condition(element) { return element }
 		}
@@ -197,7 +199,7 @@ public extension Array {
 	///
 	/// - Parameter condition: to evaluate the exclusion of an element from the array.
 	/// - Returns: the array with rejected values filtered from it.
-	public func reject(where condition: (Element) throws -> Bool) rethrows -> [Element] {
+	func reject(where condition: (Element) throws -> Bool) rethrows -> [Element] {
 		return try filter { return try !condition($0) }
 	}
 	
@@ -207,7 +209,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: number of times the condition evaluated to true.
-	public func count(where condition: (Element) throws -> Bool) rethrows -> Int {
+	func count(where condition: (Element) throws -> Bool) rethrows -> Int {
 		var count = 0
 		for element in self {
 			if try condition(element) { count += 1 }
@@ -220,7 +222,7 @@ public extension Array {
 	///		[0, 2, 4, 7].forEachReversed({ print($0)}) -> //Order of print: 7,4,2,0
 	///
 	/// - Parameter body: a closure that takes an element of the array as a parameter.
-	public func forEachReversed(_ body: (Element) throws -> Void) rethrows {
+	func forEachReversed(_ body: (Element) throws -> Void) rethrows {
 		try reversed().forEach { try body($0) }
 	}
 	
@@ -231,7 +233,7 @@ public extension Array {
 	/// - Parameters:
 	///   - condition: condition to evaluate each element against.
 	///   - body: a closure that takes an element of the array as a parameter.
-	public func forEach(where condition: (Element) throws -> Bool, body: (Element) throws -> Void) rethrows {
+	func forEach(where condition: (Element) throws -> Bool, body: (Element) throws -> Void) rethrows {
 		for element in self where try condition(element) {
 			try body(element)
 		}
@@ -245,7 +247,7 @@ public extension Array {
 	///   - initial: initial value.
 	///   - next: closure that combines the accumulating value and next element of the array.
 	/// - Returns: an array of the final accumulated value and each interim combination.
-	public func accumulate<U>(initial: U, next: (U, Element) throws -> U) rethrows -> [U] {
+	func accumulate<U>(initial: U, next: (U, Element) throws -> U) rethrows -> [U] {
 		var runningTotal = initial
 		return try map { element in
 			runningTotal = try next(runningTotal, element)
@@ -261,21 +263,21 @@ public extension Array {
 	///   - isIncluded: condition of inclusion to evaluate each element against.
 	///   - transform: transform element function to evaluate every element.
 	/// - Returns: Return an filtered and mapped array.
-	public func filtered<T>(_ isIncluded: (Element) throws -> Bool, map transform: (Element) throws -> T) rethrows ->  [T] {
-        return try compactMap({
-			if try isIncluded($0) {
-				return try transform($0)
-			}
-			return nil
-		})
-	}
+//    func filtered<T>(_ isIncluded: (Element) throws -> Bool, map transform: (Element) throws -> T) rethrows ->  [T] {
+//        return try compactMap({
+//            if try isIncluded($0) {
+//                return try transform($0)
+//            }
+//            return nil
+//        })
+//    }
 	
 	///  : Keep elements of Array while condition is true.
 	///
 	///		[0, 2, 4, 7].keep( where: {$0 % 2 == 0}) -> [0, 2, 4]
 	///
 	/// - Parameter condition: condition to evaluate each element against.
-	public mutating func keep(while condition: (Element) throws -> Bool) rethrows {
+	mutating func keep(while condition: (Element) throws -> Bool) rethrows {
 		for (index, element) in lazy.enumerated() {
 			if try !condition(element) {
 				self = Array(self[startIndex..<index])
@@ -290,7 +292,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to evaluate each element against.
 	/// - Returns: All elements up until condition evaluates to false.
-	public func take(while condition: (Element) throws -> Bool) rethrows -> [Element] {
+	func take(while condition: (Element) throws -> Bool) rethrows -> [Element] {
 		for (index, element) in lazy.enumerated() {
 			if try !condition(element) {
 				return Array(self[startIndex..<index])
@@ -305,7 +307,7 @@ public extension Array {
 	///
 	/// - Parameter condition: condition to eveluate each element against.
 	/// - Returns: All elements after the condition evaluates to false.
-	public func skip(while condition: (Element) throws-> Bool) rethrows -> [Element] {
+	func skip(while condition: (Element) throws-> Bool) rethrows -> [Element] {
 		for (index, element) in lazy.enumerated() {
 			if try !condition(element) {
 				return Array(self[index..<endIndex])
@@ -322,7 +324,7 @@ public extension Array {
 	/// - Parameters:
 	///   - slice: size of array in each interation.
 	///   - body: a closure that takes an array of slice size as a parameter.
-	public func forEach(slice: Int, body: ([Element]) throws -> Void) rethrows {
+	func forEach(slice: Int, body: ([Element]) throws -> Void) rethrows {
 		guard slice > 0, !isEmpty else { return }
 		
 		var value: Int = 0
@@ -339,7 +341,7 @@ public extension Array {
 	///
 	/// - Parameters:
 	///   - size: The size of the slices to be returned.
-	public func group(by size: Int) -> [[Element]]? {
+	func group(by size: Int) -> [[Element]]? {
 		//Inspired by: https://lodash.com/docs/4.17.4#chunk
 		guard size > 0, !isEmpty else { return nil }
 		var value: Int = 0
@@ -357,7 +359,7 @@ public extension Array {
 	///
 	/// - Parameter getKey: Clousure to define the key for each element.
 	/// - Returns: A dictionary with values grouped with keys.
-	public func groupByKey<K: Hashable>(keyForValue: (_ element: Element) throws -> K) rethrows -> [K: [Element]] {
+	func groupByKey<K: Hashable>(keyForValue: (_ element: Element) throws -> K) rethrows -> [K: [Element]] {
 		var group = [K: [Element]]()
 		for value in self {
 			let key = try keyForValue(value)
@@ -374,7 +376,7 @@ public extension Array {
 	///
 	/// - Parameter places: Number of places that the array be rotated. If the value is positive the end becomes the start, if it negative it's that start becom the end.
 	/// - Returns: The new rotated array
-	public func rotated(by places: Int) -> [Element] {
+	func rotated(by places: Int) -> [Element] {
 		//Inspired by: https://ruby-doc.org/core-2.2.0/Array.html#method-i-rotate
 		guard places != 0 && places < count else {
 			return self
@@ -401,7 +403,7 @@ public extension Array {
 	///     [1, 2, 3, 4].rotated(by: -1) -> [2,3,4,1]
 	///
 	/// - Parameter places: Number of places that the array should be rotated. If the value is positive the end becomes the start, if it negative it's that start becom the end.
-	public mutating func rotate(by places: Int) {
+	mutating func rotate(by places: Int) {
 		self = rotated(by: places)
 	}
     
@@ -409,7 +411,7 @@ public extension Array {
     ///
     ///        [1, 2, 3, 4, 5].shuffle() // shuffles array
     ///
-    public mutating func shuffle() {
+    mutating func shuffle() {
         //http://stackoverflow.com/questions/37843647/shuffle-array-swift-3
         guard count > 1 else { return }
         for index in startIndex..<endIndex - 1 {
@@ -423,7 +425,7 @@ public extension Array {
     ///        [1, 2, 3, 4, 5].shuffled // return a shuffled version from given array e.g. [2, 4, 1, 3, 5].
     ///
     /// - Returns: the array with its elements shuffled.
-    public func shuffled() -> [Element] {
+    func shuffled() -> [Element] {
         var array = self
         array.shuffle()
         return array
@@ -441,7 +443,7 @@ public extension Array where Element: Equatable {
 	///
 	/// - Parameter elements: array of elements to check.
 	/// - Returns: true if array contains all given items.
-	public func contains(_ elements: [Element]) -> Bool {
+	func contains(_ elements: [Element]) -> Bool {
 		guard !elements.isEmpty else { return true }
 		var found = true
 		for element in elements {
@@ -460,7 +462,7 @@ public extension Array where Element: Equatable {
 	///
 	/// - Parameter item: item to check.
 	/// - Returns: an array with all indexes of the given item.
-	public func indexes(of item: Element) -> [Int] {
+	func indexes(of item: Element) -> [Int] {
 		var indexes: [Int] = []
 		for index in startIndex..<endIndex where self[index] == item {
 			indexes.append(index)
@@ -474,7 +476,7 @@ public extension Array where Element: Equatable {
 	///		["h", "e", "l", "l", "o"].removeAll("l") -> ["h", "e", "o"]
 	///
 	/// - Parameter item: item to remove.
-	public mutating func removeAll(_ item: Element) {
+	mutating func removeAll(_ item: Element) {
 		self = filter { $0 != item }
 	}
 	
@@ -484,7 +486,7 @@ public extension Array where Element: Equatable {
 	///		["h", "e", "l", "l", "o"].removeAll(["l", "h"]) -> ["e", "o"]
 	///
 	/// - Parameter items: items to remove.
-	public mutating func removeAll(_ items: [Element]) {
+	mutating func removeAll(_ items: [Element]) {
 		guard !items.isEmpty else { return }
 		self = filter { !items.contains($0) }
 	}
@@ -494,7 +496,7 @@ public extension Array where Element: Equatable {
 	///		[1, 2, 2, 3, 4, 5].removeDuplicates() -> [1, 2, 3, 4, 5]
 	///		["h", "e", "l", "l", "o"]. removeDuplicates() -> ["h", "e", "l", "o"]
 	///
-	public mutating func removeDuplicates() {
+	mutating func removeDuplicates() {
 		// Thanks to https://github.com/sairamkotha for improving the method
         self = reduce(into: [Element]()) {
             if !$0.contains($1) {
@@ -510,7 +512,7 @@ public extension Array where Element: Equatable {
     ///
 	/// - Returns: an array of unique elements.
     ///
-	public func duplicatesRemoved() -> [Element] {
+	func duplicatesRemoved() -> [Element] {
 		// Thanks to https://github.com/sairamkotha for improving the property
         return reduce(into: [Element]()) {
             if !$0.contains($1) {
@@ -527,7 +529,7 @@ public extension Array where Element: Equatable {
 	///
 	/// - Parameter item: item to check.
 	/// - Returns: first index of item in array (if exists).
-	public func firstIndex(of item: Element) -> Int? {
+	func firstIndex(of item: Element) -> Int? {
 		for (index, value) in lazy.enumerated() where value == item {
 			return index
 		}
@@ -542,7 +544,7 @@ public extension Array where Element: Equatable {
 	///
 	/// - Parameter item: item to check.
 	/// - Returns: last index of item in array (if exists).
-	public func lastIndex(of item: Element) -> Int? {
+	func lastIndex(of item: Element) -> Int? {
 		for (index, value) in lazy.enumerated().reversed() where value == item {
 			return index
 		}

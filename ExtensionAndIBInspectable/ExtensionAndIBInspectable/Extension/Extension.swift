@@ -1,20 +1,19 @@
 //
 //  Extension.swift
+//  coinbidz
 //
 //  Created by datt on 02/01/18.
-//  Copyright © 2018 datt. All rights reserved.
+//  Copyright © 2018 zaptechsolutions. All rights reserved.
 //
 
 import UIKit
 import CoreLocation
-import AVFoundation
-import Photos
 
 extension UIApplication {
     
     var screenShot: UIImage?  {
         
-        if let rootViewController = keyWindow?.rootViewController {
+        if let rootViewController = Constants.keyWindow?.rootViewController {
             let scale = UIScreen.main.scale
             let bounds = rootViewController.view.bounds
             UIGraphicsBeginImageContextWithOptions(bounds.size, false, scale);
@@ -41,7 +40,7 @@ extension UIViewController {
         self.navigationItem.leftBarButtonItem = item
     }
     @objc func popVC() {
-        navigationController?.navigationBar.backItem?.title = ""
+//        navigationController?.navigationBar.backItem?.title = ""
         if let navController = self.navigationController {
             navController.popViewController(animated: true)
         }
@@ -62,7 +61,7 @@ extension UIViewController {
 }
 extension UIApplication {
     ///  Run a block in background after app resigns activity
-    public func runInBackground(_ closure: @escaping () -> Void, expirationHandler: (() -> Void)? = nil) {
+    func runInBackground(_ closure: @escaping () -> Void, expirationHandler: (() -> Void)? = nil) {
         DispatchQueue.main.async {
             let taskID: UIBackgroundTaskIdentifier
             if let expirationHandler = expirationHandler {
@@ -76,7 +75,11 @@ extension UIApplication {
     }
     
     ///  Get the top most view controller from the base view controller; default param is UIWindow's rootViewController
-    public class func topViewController(_ base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+    public class func topViewController(_ base: UIViewController? = UIApplication.shared.windows.first?.rootViewController) -> UIViewController? {
+        var base = base
+        if base == nil {
+          base = Constants.keyWindow?.rootViewController
+        }
         if let nav = base as? UINavigationController {
             return topViewController(nav.visibleViewController)
         }
@@ -96,7 +99,14 @@ extension UIApplication {
 
 extension UINavigationController{
     override open var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+        return .default
+    }
+    func setShadowNavigationBar(){
+        self.navigationBar.layer.shadowColor = UIColor.lightGray.cgColor
+        self.navigationBar.shadowOffset = CGSize(width: 0.0, height: 2.0)
+        self.navigationBar.shadowRadius = 4.0
+        self.navigationBar.shadowOpacity = 2.0
+        self.navigationBar.layer.masksToBounds = false
     }
 }
 
@@ -117,126 +127,6 @@ extension CGFloat {
         return CGFloat(arc4random()) / CGFloat(UInt32.max)
     }
 }
-// MARK: - Choose Photo Method
-
-protocol ChoosePicture {
-    func takeAndChoosePhoto()
-}
-
-extension ChoosePicture where Self: UIViewController ,Self: UIImagePickerControllerDelegate , Self : UINavigationControllerDelegate {
-    func alertPromptToAllowPhotoAccessViaSetting() {
-        
-        let alert = UIAlertController(title: nil, message:"Please enable access for photos from Privacy Settings", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .default))
-        alert.addAction(UIAlertAction(title: "Settings", style: .cancel) { (alert) -> Void in
-            if #available(iOS 10.0, *) {
-                UIApplication.shared.open(URL(string:"App-Prefs:root=Privacy&path=PHOTOS")!, options: [:], completionHandler: nil)
-            } else {
-                // Fallback on earlier versions
-                UIApplication.shared.openURL(URL(string:"App-Prefs:root=Privacy&path=PHOTOS")!)
-            }
-        })
-        present(alert, animated: true)
-    }
-    func alertPromptToAllowCameraAccessViaSetting() {
-        let alert = UIAlertController(title: nil, message: "Please enable camera access from Privacy Settings", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Cancel", style: .default))
-        alert.addAction(UIAlertAction(title: "Settings", style: .cancel) { (alert) -> Void in
-            if #available(iOS 10.0, *) {
-                UIApplication.shared.open(URL(string:"App-Prefs:root=Privacy&path=CAMERA")!, options: [:], completionHandler: nil)
-                DispatchQueue.main.async {
-                    _ = self.navigationController?.popViewController(animated: true)
-                }
-            }
-            else {
-                // Fallback on earlier versions
-                UIApplication.shared.openURL(URL(string:"App-Prefs:root=Privacy&path=CAMERA")!)
-                DispatchQueue.main.async {
-                    _ = self.navigationController?.popViewController(animated: true)
-                }
-            }
-        })
-        present(alert, animated: true)
-    }
-    
-    func takeAndChoosePhoto(){
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        let btnCancel = UIAlertAction(title: "Cancel", style: .cancel, handler: {(action: UIAlertAction) -> Void in
-            //  UIAlertController will automatically dismiss the view
-        })
-        let btnTakePhoto = UIAlertAction(title: "Take Photo", style: .default, handler: {(action: UIAlertAction) -> Void in
-            if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-                            debugPrint("Device Has No Camera")
-            }
-            else {
-                let authStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
-                switch authStatus {
-                case .authorized: let imagePickerController = UIImagePickerController()
-                imagePickerController.sourceType = .camera
-                imagePickerController.delegate = self
-                self.present(imagePickerController, animated: true, completion: {() -> Void in
-                })
-                case .denied: self.alertPromptToAllowCameraAccessViaSetting()
-                    
-                default:
-                    let imagePickerController = UIImagePickerController()
-                    imagePickerController.sourceType = .camera
-                    imagePickerController.delegate = self
-                    self.present(imagePickerController, animated: true, completion: {() -> Void in
-                    })
-                }
-            }
-        })
-        let btnChooseExisting = UIAlertAction(title: "Choose Photo", style: .default, handler: {(_ action: UIAlertAction) -> Void in
-            //  The user tapped on "Choose existing"
-            let status = PHPhotoLibrary.authorizationStatus()
-            
-            if (status == PHAuthorizationStatus.authorized) {
-                // Access has been granted.
-                let imagePickerController = UIImagePickerController()
-                imagePickerController.sourceType = .photoLibrary
-                imagePickerController.delegate = self
-                self.present(imagePickerController, animated: true, completion: {() -> Void in
-                })
-            }
-            else if (status == PHAuthorizationStatus.denied) {
-                self.alertPromptToAllowPhotoAccessViaSetting()
-            }
-            else if (status == PHAuthorizationStatus.notDetermined) {
-                // Access has not been determined.
-                PHPhotoLibrary.requestAuthorization({ (newStatus) in
-                    
-                    if (newStatus == PHAuthorizationStatus.authorized) {
-                        let imagePickerController = UIImagePickerController()
-                        imagePickerController.sourceType = .photoLibrary
-                        imagePickerController.delegate = self
-                        DispatchQueue.main.async {
-                            self.present(imagePickerController, animated: true, completion: {() -> Void in
-                            })
-                        }
-                        
-                    }
-                    else {
-                        DispatchQueue.main.async {
-                            _ = self.navigationController?.popViewController(animated: true)
-                        }
-                    }
-                })
-            }
-            else if (status == PHAuthorizationStatus.restricted) {
-                // Restricted access - normally won't happen.
-            }
-        })
-        
-        
-        alert.addAction(btnCancel)
-        alert.addAction(btnTakePhoto)
-        alert.addAction(btnChooseExisting)
-        
-        //alert.view.tintColor = UIColor.black
-        present(alert, animated: true)
-    }
-}
 
 // MARK: - RGB Color Extension
 
@@ -255,6 +145,28 @@ extension UIColor {
             g: (rgb >> 8) & 0xFF,
             b: rgb & 0xFF,
             a: a
+        )
+    }
+    convenience init(hex:String)  {
+        var cString:String = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        
+        if (cString.hasPrefix("#")) {
+            cString.remove(at: cString.startIndex)
+        }
+        
+        if ((cString.count) != 6) {
+            self.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 1.0)
+            return
+        }
+        
+        var rgbValue:UInt64 = 0
+        Scanner(string: cString).scanHexInt64(&rgbValue)
+        
+        self.init(
+            red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+            blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+            alpha: CGFloat(1.0)
         )
     }
 }
@@ -292,10 +204,58 @@ extension UITextField {
         text = String(prospectiveText.prefix(upTo: maxCharIndex))
         selectedTextRange = selection
     }
+    func validZipCode()->Bool{
+        let postalcodeRegex = "^[0-9]{5}(-[0-9]{4})?$"
+        let pinPredicate = NSPredicate(format: "SELF MATCHES %@", postalcodeRegex)
+        let bool = pinPredicate.evaluate(with: self.text) as Bool
+        return bool
+    }
+//    static let emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
+    static let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+    func addLeftTextPadding(_ blankSize: CGFloat) {
+        let leftView = UIView()
+        leftView.frame = CGRect(x: 0, y: 0, width: blankSize, height: frame.height)
+        self.leftView = leftView
+        self.leftViewMode = UITextField.ViewMode.always
+    }
+    func addLeftIcon(_ image: UIImage?, frame: CGRect, imageSize: CGSize) {
+        let leftView = UIView()
+        leftView.frame = frame
+        let imgView = UIImageView()
+        imgView.frame = CGRect(x: frame.width - 8 - imageSize.width, y: (frame.height - imageSize.height) / 2, width: imageSize.width, height: imageSize.height)
+        imgView.image = image
+        leftView.addSubview(imgView)
+        self.leftView = leftView
+        self.leftViewMode = UITextField.ViewMode.always
+    }
     
-}
-extension UITextField
-{
+    func validateEmail() -> Bool {
+        let emailTest = NSPredicate(format:"SELF MATCHES %@", UITextField.emailRegex)
+        return emailTest.evaluate(with: self.text)
+    }
+    func validateDigits() -> Bool {
+        let digitsRegEx = "[0-9]*"
+        let digitsTest = NSPredicate(format:"SELF MATCHES %@", digitsRegEx)
+        return digitsTest.evaluate(with: self.text)
+    }
+    
+    
+    /// Check if text field is empty.
+    public var isEmpty: Bool {
+        return trimmedText?.isEmpty == true
+    }
+    
+    ///  Return text with no spaces or new lines in beginning and end.
+    public var trimmedText: String? {
+        return text?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    func checkMinAndMaxLength(withMinLimit minLen: Int, withMaxLimit maxLen: Int) -> Bool {
+        if (self.text!.count ) >= minLen && (self.text!.count ) <= maxLen {
+            return true
+        }
+        return false
+    }
     enum Direction
     {
         case Left
@@ -323,52 +283,9 @@ extension UITextField
             self.rightView = View
         }
     }
-    
-}
-extension UITextField {
-    
-//    /// set icon of 20x20 with left padding of 8px
-//    func setLeftIcon(_ icon: UIImage) {
-//
-//        let padding = 8
-//        let size = 20
-//
-//        let outerView = UIView(frame: CGRect(x: 0, y: 0, width: size+padding, height: size) )
-//        let iconView  = UIImageView(frame: CGRect(x: padding, y: 0, width: size, height: size))
-//        iconView.image = icon
-//        outerView.addSubview(iconView)
-//
-//        leftView = outerView
-//        leftViewMode = .always
-//    }
-    static let emailRegex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
-    public func addLeftTextPadding(_ blankSize: CGFloat) {
-        let leftView = UIView()
-        leftView.frame = CGRect(x: 0, y: 0, width: blankSize, height: frame.height)
-        self.leftView = leftView
-        self.leftViewMode = UITextFieldViewMode.always
-    }
-    public func addLeftIcon(_ image: UIImage?, frame: CGRect, imageSize: CGSize) {
-        let leftView = UIView()
-        leftView.frame = frame
-        let imgView = UIImageView()
-        imgView.frame = CGRect(x: frame.width - 8 - imageSize.width, y: (frame.height - imageSize.height) / 2, width: imageSize.width, height: imageSize.height)
-        imgView.image = image
-        leftView.addSubview(imgView)
-        self.leftView = leftView
-        self.leftViewMode = UITextFieldViewMode.always
-    }
 
-    func validateEmail() -> Bool {
-        let emailTest = NSPredicate(format:"SELF MATCHES %@", UITextField.emailRegex)
-        return emailTest.evaluate(with: self.text)
-    }
-    func validateDigits() -> Bool {
-        let digitsRegEx = "[0-9]*"
-        let digitsTest = NSPredicate(format:"SELF MATCHES %@", digitsRegEx)
-        return digitsTest.evaluate(with: self.text)
-    }
 }
+
 //@IBDesignable
 extension UITextField {
     
@@ -403,7 +320,7 @@ extension UITextField {
             return self.placeHolderColor
         }
         set {
-            self.attributedPlaceholder = NSAttributedString(string:self.placeholder != nil ? self.placeholder! : "", attributes:[NSAttributedStringKey.foregroundColor: newValue!])
+            self.attributedPlaceholder = NSAttributedString(string:self.placeholder != nil ? self.placeholder! : "", attributes:[NSAttributedString.Key.foregroundColor: newValue!])
         }
     }
 }
@@ -473,13 +390,13 @@ extension CGFloat {
         return min + CGFloat(arc4random_uniform(UInt32(delta)))
     }
     
-    public func degreesToRadians() -> CGFloat {
+    func degreesToRadians() -> CGFloat {
         return (.pi * self) / 180.0
     }
 }
 extension URL {
 ///  Returns remote size of url, don't use it in main thread
-    public func remoteSize(_ completionHandler: @escaping ((_ contentLength: Int64) -> Void), timeoutInterval: TimeInterval = 30) {
+    func remoteSize(_ completionHandler: @escaping ((_ contentLength: Int64) -> Void), timeoutInterval: TimeInterval = 30) {
         let request = NSMutableURLRequest(url: self, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: timeoutInterval)
         request.httpMethod = "HEAD"
         request.setValue("", forHTTPHeaderField: "Accept-Encoding")
@@ -492,7 +409,7 @@ extension URL {
     }
 
     ///  Returns server supports resuming or not, don't use it in main thread
-    public func supportsResume(_ completionHandler: @escaping ((_ doesSupport: Bool) -> Void), timeoutInterval: TimeInterval = 30) {
+    func supportsResume(_ completionHandler: @escaping ((_ doesSupport: Bool) -> Void), timeoutInterval: TimeInterval = 30) {
         let request = NSMutableURLRequest(url: self, cachePolicy: NSURLRequest.CachePolicy.reloadIgnoringLocalAndRemoteCacheData, timeoutInterval: timeoutInterval)
         request.httpMethod = "HEAD"
         request.setValue("bytes=5-10", forHTTPHeaderField: "Range")
@@ -509,21 +426,21 @@ extension UIImage {
     
     //  Returns base64 string
     public var base64: String {
-        return UIImageJPEGRepresentation(self, 1.0)!.base64EncodedString()
+        return self.jpegData(compressionQuality: 1.0)!.base64EncodedString()
     }
     
     //  Returns compressed image to rate from 0 to 1
-    public func compressImage(rate: CGFloat) -> Data? {
-        return UIImageJPEGRepresentation(self, rate)
+    func compressImage(rate: CGFloat) -> Data? {
+        return self.jpegData(compressionQuality: rate)
     }
     
     //  Returns Image size in Bytes
-    public func getSizeAsBytes() -> Int {
-        return UIImageJPEGRepresentation(self, 1)?.count ?? 0
+    func getSizeAsBytes() -> Int {
+        return self.jpegData(compressionQuality: 1.0)?.count ?? 0
     }
     
     //  Returns Image size in Kylobites
-    public func getSizeAsKilobytes() -> Int {
+    func getSizeAsKilobytes() -> Int {
         let sizeAsBytes = getSizeAsBytes()
         return sizeAsBytes != 0 ? sizeAsBytes / 1024 : 0
     }
@@ -539,7 +456,7 @@ extension UIImage {
 }
 
     /// Returns resized image with width. Might return low quality
-    public func resizeWithWidth(_ width: CGFloat) -> UIImage {
+    func resizeWithWidth(_ width: CGFloat) -> UIImage {
         let aspectSize = CGSize (width: width, height: aspectHeightForWidth(width))
         
         UIGraphicsBeginImageContext(aspectSize)
@@ -551,7 +468,7 @@ extension UIImage {
     }
     
     /// Returns resized image with height. Might return low quality
-    public func resizeWithHeight(_ height: CGFloat) -> UIImage {
+    func resizeWithHeight(_ height: CGFloat) -> UIImage {
         let aspectSize = CGSize (width: aspectWidthForHeight(height), height: height)
         
         UIGraphicsBeginImageContext(aspectSize)
@@ -563,17 +480,17 @@ extension UIImage {
     }
     
     ///
-    public func aspectHeightForWidth(_ width: CGFloat) -> CGFloat {
+    func aspectHeightForWidth(_ width: CGFloat) -> CGFloat {
         return (width * self.size.height) / self.size.width
     }
     
     ///
-    public func aspectWidthForHeight(_ height: CGFloat) -> CGFloat {
+    func aspectWidthForHeight(_ height: CGFloat) -> CGFloat {
         return (height * self.size.width) / self.size.height
     }
     
     //  Returns cropped image from CGRect
-    public func croppedImage(_ bound: CGRect) -> UIImage? {
+    func croppedImage(_ bound: CGRect) -> UIImage? {
         guard self.size.width > bound.origin.x else {
             print(" Your cropping X coordinate is larger than the image width")
             return nil
@@ -584,7 +501,7 @@ extension UIImage {
         }
         let scaledBounds: CGRect = CGRect(x: bound.origin.x * self.scale, y: bound.origin.y * self.scale, width: bound.width * self.scale, height: bound.height * self.scale)
         let imageRef = self.cgImage?.cropping(to: scaledBounds)
-        let croppedImage: UIImage = UIImage(cgImage: imageRef!, scale: self.scale, orientation: UIImageOrientation.up)
+        let croppedImage: UIImage = UIImage(cgImage: imageRef!, scale: self.scale, orientation: UIImage.Orientation.up)
         return croppedImage
     }
     public convenience init?(color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) {
@@ -617,7 +534,7 @@ extension UIImage {
 
 public extension UICollectionView {
     /// - Parameter completion: completion handler to run after reloadData finishes.
-    public func reloadData(_ completion: @escaping () -> Void) {
+    func reloadData(_ completion: @escaping () -> Void) {
         UIView.animate(withDuration: 0, animations: {
             self.reloadData()
         }, completion: { _ in
@@ -629,7 +546,7 @@ public extension UITableView {
     /// Reload data with a completion handler.
     ///
     /// - Parameter completion: completion handler to run after reloadData finishes.
-    public func reloadData(_ completion: @escaping () -> Void) {
+    func reloadData(_ completion: @escaping () -> Void) {
         UIView.animate(withDuration: 0, animations: {
             self.reloadData()
         }, completion: { _ in
@@ -637,18 +554,18 @@ public extension UITableView {
         })
     }
     /// : Remove TableFooterView.
-    public func removeTableFooterView() {
+    func removeTableFooterView() {
         tableFooterView = nil
     }
     
     /// : Remove TableHeaderView.
-    public func removeTableHeaderView() {
+    func removeTableHeaderView() {
         tableHeaderView = nil
     }
     /// : Scroll to bottom of TableView.
     ///
     /// - Parameter animated: set true to animate scroll (default is true).
-    public func scrollToBottom(animated: Bool = true) {
+    func scrollToBottom(animated: Bool = true) {
         let bottomOffset = CGPoint(x: 0, y: contentSize.height - bounds.size.height)
         setContentOffset(bottomOffset, animated: animated)
     }
@@ -656,7 +573,7 @@ public extension UITableView {
     /// : Scroll to top of TableView.
     ///
     /// - Parameter animated: set true to animate scroll (default is true).
-    public func scrollToTop(animated: Bool = true) {
+    func scrollToTop(animated: Bool = true) {
         setContentOffset(CGPoint.zero, animated: animated)
     }
 }
@@ -669,8 +586,8 @@ public extension UIImageView {
     ///   - contentMode: imageView content mode (default is .scaleAspectFit).
     ///   - placeHolder: optional placeholder image
     ///   - completionHandler: optional completion handler to run when download finishs (default is nil).
-    public func download(from url: URL,
-                         contentMode: UIViewContentMode = .scaleAspectFit,
+    func download(from url: URL,
+                         contentMode: UIView.ContentMode = .scaleAspectFit,
                          placeholder: UIImage? = nil,
                          completionHandler: ((UIImage?) -> Void)? = nil) {
         
@@ -696,7 +613,7 @@ public extension UIImageView {
     /// : Make image view blurry
     ///
     /// - Parameter style: UIBlurEffectStyle (default is .light).
-    public func blur(withStyle style: UIBlurEffectStyle = .light) {
+    func blur(withStyle style: UIBlurEffect.Style = .light) {
         let blurEffect = UIBlurEffect(style: style)
         let blurEffectView = UIVisualEffectView(effect: blurEffect)
         blurEffectView.frame = bounds
@@ -709,7 +626,7 @@ public extension UIImageView {
     ///
     /// - Parameter style: UIBlurEffectStyle (default is .light).
     /// - Returns: blurred version of self.
-    public func blurred(withStyle style: UIBlurEffectStyle = .light) -> UIImageView {
+    func blurred(withStyle style: UIBlurEffect.Style = .light) -> UIImageView {
         let imgView = self
         imgView.blur(withStyle: style)
         return imgView
@@ -721,7 +638,7 @@ public extension UINavigationController {
     /// : Pop ViewController with completion handler.
     ///
     /// - Parameter completion: optional completion handler (default is nil).
-    public func popViewController(_ completion: (() -> Void)? = nil) {
+    func popViewController(_ completion: (() -> Void)? = nil) {
         CATransaction.begin()
         CATransaction.setCompletionBlock(completion)
         popViewController(animated: true)
@@ -733,7 +650,7 @@ public extension UINavigationController {
     /// - Parameters:
     ///   - viewController: viewController to push.
     ///   - completion: optional completion handler (default is nil).
-    public func pushViewController(_ viewController: UIViewController, completion: (() -> Void)? = nil) {
+    func pushViewController(_ viewController: UIViewController, completion: (() -> Void)? = nil) {
         CATransaction.begin()
         CATransaction.setCompletionBlock(completion)
         pushViewController(viewController, animated: true)
@@ -743,7 +660,7 @@ public extension UINavigationController {
     /// : Make navigation controller's navigation bar transparent.
     ///
     /// - Parameter tint: tint color (default is .white).
-    public func makeTransparent(withTint tint: UIColor = .white) {
+    func makeTransparent(withTint tint: UIColor = .white) {
         navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationBar.shadowImage = UIImage()
         navigationBar.isTranslucent = true
@@ -755,7 +672,7 @@ public extension UINavigationController {
 public extension UISearchBar {
     
     /// : Text field inside search bar (if applicable).
-    public var textField: UITextField? {
+    var textField: UITextField? {
         let subViews = subviews.flatMap { $0.subviews }
         guard let textField = (subViews.filter { $0 is UITextField }).first as? UITextField else {
             return nil
@@ -764,7 +681,7 @@ public extension UISearchBar {
     }
     
     /// : Text with no spaces or new lines in beginning and end (if applicable).
-    public var trimmedText: String? {
+    var trimmedText: String? {
         return text?.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
@@ -778,7 +695,7 @@ public extension UISlider {
     ///   - animated: set true to animate value change (default is true).
     ///   - duration: animation duration in seconds (default is 1 second).
     ///   - completion: an optional completion handler to run after value is changed (default is nil)
-    public func setValue(_ value: Float, animated: Bool = true, duration: TimeInterval = 1, completion: (() -> Void)? = nil) {
+    func setValue(_ value: Float, animated: Bool = true, duration: TimeInterval = 1, completion: (() -> Void)? = nil) {
         if animated {
             UIView.animate(withDuration: duration, animations: {
                 self.setValue(value, animated: true)
@@ -799,19 +716,19 @@ public extension UIViewController {
     /// - Parameters:
     ///   - name: notification name.
     ///   - selector: selector to run with notified.
-    public func addNotificationObserver(name: Notification.Name, selector: Selector) {
+    func addNotificationObserver(name: Notification.Name, selector: Selector) {
         NotificationCenter.default.addObserver(self, selector: selector, name: name, object: nil)
     }
     
     /// : Unassign as listener to notification.
     ///
     /// - Parameter name: notification name.
-    public func removeNotificationObserver(name: Notification.Name) {
+    func removeNotificationObserver(name: Notification.Name) {
         NotificationCenter.default.removeObserver(self, name: name, object: nil)
     }
     
     /// : Unassign as listener from all notifications.
-    public func removeNotificationsObserver() {
+    func removeNotificationsObserver() {
         NotificationCenter.default.removeObserver(self)
     }
     
@@ -849,7 +766,7 @@ public extension CLLocation {
     ///   - start: Start location.
     ///   - end: End location.
     /// - Returns: Location that represents the half-way point.
-    public static func midLocation(start: CLLocation, end: CLLocation) -> CLLocation {
+    static func midLocation(start: CLLocation, end: CLLocation) -> CLLocation {
         let lat1 = Double.pi * start.coordinate.latitude / 180.0
         let long1 = Double.pi * start.coordinate.longitude / 180.0
         let lat2 = Double.pi * end.coordinate.latitude / 180.0
@@ -874,7 +791,7 @@ public extension CLLocation {
     ///
     /// - Parameter point: End location.
     /// - Returns: Location that represents the half-way point.
-    public func midLocation(to point: CLLocation) -> CLLocation {
+    func midLocation(to point: CLLocation) -> CLLocation {
         return CLLocation.midLocation(start: self, end: point)
     }
     
@@ -883,7 +800,7 @@ public extension CLLocation {
     /// - Parameters:
     ///   - destination: Location to calculate bearing.
     /// - Returns: Calculated bearing degrees in the range 0° ... 360°
-    public func bearing(to destination: CLLocation) -> Double {
+    func bearing(to destination: CLLocation) -> Double {
         //http://stackoverflow.com/questions/3925942/cllocation-category-for-calculating-bearing-w-haversine-function
         let lat1 = Double.pi * coordinate.latitude / 180.0
         let long1 = Double.pi * coordinate.longitude / 180.0
@@ -914,3 +831,258 @@ class CustomSlider: UISlider {
     }
 }
 
+extension UIButton {
+    @IBInspectable var bgImgColor: UIColor? {
+        get {
+            return self.bgImgColor
+        }
+        set {
+            self.setBackgroundColor(color: newValue ?? UIColor.clear, forUIControlState: .normal)
+        }
+    }
+    private func imageWithColor(color: UIColor) -> UIImage {
+        let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
+        UIGraphicsBeginImageContext(rect.size)
+        let context = UIGraphicsGetCurrentContext()
+        
+        context!.setFillColor(color.cgColor)
+        context!.fill(rect)
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return image ?? UIImage()
+    }
+    
+    func setBackgroundColor(color: UIColor, forUIControlState state: UIControl.State) {
+        self.setBackgroundImage(imageWithColor(color: color), for: state)
+    }
+}
+
+protocol Storyboarded {
+    static func instantiate() -> Self
+}
+
+extension Storyboarded where Self: UIViewController {
+    static func instantiate() -> Self {
+        let id = String(describing: self)
+        let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+        return storyboard.instantiateViewController(withIdentifier: id) as! Self
+    }
+}
+
+
+extension UISearchBar {
+    
+    func getTextField() -> UITextField? { return value(forKey: "searchField") as? UITextField }
+    func setText(color: UIColor) { if let textField = getTextField() { textField.textColor = color } }
+    func setPlaceholderText(color: UIColor) { getTextField()?.setPlaceholderText(color: color) }
+    func setClearButton(color: UIColor) { getTextField()?.setClearButton(color: color) }
+    
+    func setTextField(color: UIColor) {
+        guard let textField = getTextField() else { return }
+        switch searchBarStyle {
+        case .minimal:
+            textField.layer.backgroundColor = color.cgColor
+            textField.layer.cornerRadius = 6
+        case .prominent, .default: textField.backgroundColor = color
+        @unknown default: break
+        }
+    }
+    
+    func setSearchImage(color: UIColor) {
+        guard let imageView = getTextField()?.leftView as? UIImageView else { return }
+        imageView.tintColor = color
+        imageView.image = imageView.image?.withRenderingMode(.alwaysTemplate)
+    }
+    func setSearchImage(img: UIImage) {
+        guard let imageView = getTextField()?.leftView as? UIImageView else { return }
+        imageView.frame = CGRect(x: imageView.x, y: imageView.y, width: 20, height: 20)
+        imageView.image = img.withRenderingMode(.alwaysTemplate)
+        imageView.tintColor = tintColor
+    }
+}
+
+extension UITextField {
+    
+    private class ClearButtonImage {
+        static private var _image: UIImage?
+        static private var semaphore = DispatchSemaphore(value: 1)
+        static func getImage(closure: @escaping (UIImage?)->()) {
+            DispatchQueue.global(qos: .userInteractive).async {
+                semaphore.wait()
+                DispatchQueue.main.async {
+                    if let image = _image { closure(image); semaphore.signal(); return }
+                    guard let window = UIApplication.shared.windows.first else { semaphore.signal(); return }
+                    let searchBar = UISearchBar(frame: CGRect(x: 0, y: -200, width: UIScreen.main.bounds.width, height: 44))
+                    window.rootViewController?.view.addSubview(searchBar)
+                    searchBar.text = "txt"
+                    searchBar.layoutIfNeeded()
+                    _image = searchBar.getTextField()?.getClearButton()?.image(for: .normal)
+                    closure(_image)
+                    searchBar.removeFromSuperview()
+                    semaphore.signal()
+                }
+            }
+        }
+    }
+    
+    func setClearButton(color: UIColor) {
+        ClearButtonImage.getImage { [weak self] image in
+            guard   let image = image,
+                let button = self?.getClearButton() else { return }
+            button.imageView?.tintColor = color
+            button.setImage(image.withRenderingMode(.alwaysTemplate), for: .normal)
+        }
+    }
+    
+    func setPlaceholderText(color: UIColor) {
+        attributedPlaceholder = NSAttributedString(string: placeholder != nil ? placeholder! : "", attributes: [.foregroundColor: color])
+    }
+    
+    func getClearButton() -> UIButton? { return value(forKey: "clearButton") as? UIButton }
+}
+extension UserDefaults {
+    
+    func save<T:Encodable>(customObject object: T, inKey key: String) {
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(object) {
+            self.set(encoded, forKey: key)
+        }
+    }
+    
+    func retrieve<T:Decodable>(object type:T.Type, fromKey key: String) -> T? {
+        if let data = self.data(forKey: key) {
+            let decoder = JSONDecoder()
+            if let object = try? decoder.decode(type, from: data) {
+                return object
+            }else {
+                print("Couldnt decode object")
+                return nil
+            }
+        }else {
+            print("Couldnt find key")
+            return nil
+        }
+    }
+    
+}
+extension UIImage {
+    func fixOrientation() -> UIImage {
+        if self.imageOrientation == UIImage.Orientation.up {
+            return self
+        }
+        UIGraphicsBeginImageContextWithOptions(self.size, false, self.scale)
+        self.draw(in: CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height))
+        if let normalizedImage: UIImage = UIGraphicsGetImageFromCurrentImageContext() {
+            UIGraphicsEndImageContext()
+            return normalizedImage
+        } else {
+            return self
+        }
+    }
+}
+
+typealias UIButtonTargetClosure = (UIButton) -> ()
+
+class ClosureWrapper: NSObject {
+    let closure: UIButtonTargetClosure
+    init(_ closure: @escaping UIButtonTargetClosure) {
+        self.closure = closure
+    }
+}
+
+extension UIButton {
+    
+    private struct AssociatedKeys {
+        static var targetClosure = "targetClosure"
+    }
+    
+    private var targetClosure: UIButtonTargetClosure? {
+        get {
+            guard let closureWrapper = objc_getAssociatedObject(self, &AssociatedKeys.targetClosure) as? ClosureWrapper else { return nil }
+            return closureWrapper.closure
+        }
+        set(newValue) {
+            guard let newValue = newValue else { return }
+            objc_setAssociatedObject(self, &AssociatedKeys.targetClosure, ClosureWrapper(newValue), objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    func action(closure: @escaping UIButtonTargetClosure) {
+        targetClosure = closure
+        addTarget(self, action: #selector(UIButton.closureAction), for: .touchUpInside)
+    }
+    
+    @objc func closureAction() {
+        guard let targetClosure = targetClosure else { return }
+        targetClosure(self)
+    }
+}
+extension UIApplication {
+    var statusBarView: UIView? {
+        if responds(to: Selector(("statusBar"))) {
+            return value(forKey: "statusBar") as? UIView
+        }
+        return nil
+    }
+}
+//MARK:- Cell animation
+enum ScrollDirection {
+    case up
+    case down
+}
+extension UIView
+{
+    func cell3DCardAnimate(_ scrollDirection: ScrollDirection = .down){
+        //1. Setup the CATransform3D structure
+        var rotation = CATransform3D()
+        switch scrollDirection {
+        case .up:
+            rotation = CATransform3DMakeRotation((270.0 * .pi) / 180, 0.0, 0.7, 0.4)
+        case .down:
+            rotation = CATransform3DMakeRotation((90.0 * .pi) / 180, 0.0, 0.7, 0.4)
+        }
+        rotation.m34 = 1.0 / -600
+        //2. Define the initial state (Before the animation)
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOffset = CGSize(width: CGFloat(10), height: CGFloat(10))
+        self.alpha = 0
+        self.layer.transform = rotation
+        self.layer.anchorPoint = CGPoint(x: CGFloat(0), y: CGFloat(0.5))
+        //!!!FIX for issue #1 Cell position wrong————
+        //        if cell.layer.position.x != 0 {
+        self.layer.position = CGPoint(x: CGFloat(0), y: CGFloat(self.layer.position.y))
+        //        }
+        //3. Define the final state (After the animation) and commit the animation
+//        UIView.beginAnimations("rotation", context: nil)
+//        UIView.setAnimationDuration(0.5)
+        UIView.animate(withDuration: 0.5) {
+            self.layer.transform = CATransform3DIdentity
+            self.alpha = 1
+            self.layer.shadowOffset = CGSize(width: CGFloat(0), height: CGFloat(0))
+        }
+//        UIView.commitAnimations()
+    }
+    func cellSlideAnimation(_ indexPath:IndexPath) {
+        if indexPath.row % 2 == 0 {
+            self.frame = CGRect(x: self.w, y: self.y, width: self.w, height: self.h)
+            UIView.animate(withDuration: 0.5) {
+                self.frame = CGRect(x: 0, y: self.y, width: self.w, height: self.h)
+            }
+        } else {
+            self.frame = CGRect(x: -self.w, y: self.y, width: self.w, height: self.h)
+            UIView.animate(withDuration: 0.5) {
+                self.frame = CGRect(x: 0, y: self.y, width: self.w, height: self.h)
+            }
+        }
+    }
+    func cellScaleAnimation() {
+        self.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        UIView.animate(withDuration: 0.25,animations: {
+            self.transform = CGAffineTransform.identity
+        },completion: { _ in
+            
+        })
+    }
+}

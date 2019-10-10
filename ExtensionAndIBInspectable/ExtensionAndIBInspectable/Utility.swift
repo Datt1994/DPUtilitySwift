@@ -107,8 +107,8 @@ func trimString(string : NSString) -> NSString {
 // MARK: - Alert and Action Sheet Controller
 
 func showAlertView(_ strAlertTitle : String, strAlertMessage : String) -> UIAlertController {
-    let alert = UIAlertController(title: strAlertTitle, message: strAlertMessage, preferredStyle: UIAlertControllerStyle.alert)
-    alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler:{ (ACTION :UIAlertAction!)in
+    let alert = UIAlertController(title: strAlertTitle, message: strAlertMessage, preferredStyle: UIAlertController.Style.alert)
+    alert.addAction(UIAlertAction(title: "Ok", style: UIAlertAction.Style.default, handler:{ (ACTION :UIAlertAction!)in
     }))
     return alert
 }
@@ -258,8 +258,8 @@ func checkPhotoLibraryPermissionsGranted() -> Bool {
 // MARK: - Set NavigationBar Methods
 
 func setNavigationBar(viewController : UIViewController, strTitleName : String) {
-    let titleDict: NSDictionary = [NSAttributedStringKey.foregroundColor: UIColor.whiteColor]
-    viewController.navigationController?.navigationBar.titleTextAttributes = (titleDict as! [NSAttributedStringKey : Any])
+    let titleDict: NSDictionary = [NSAttributedString.Key.foregroundColor: UIColor.whiteColor]
+    viewController.navigationController?.navigationBar.titleTextAttributes = (titleDict as! [NSAttributedString.Key : Any])
     
     viewController.navigationController?.navigationBar.tintColor = .whiteColor()
     
@@ -277,16 +277,16 @@ func setNavigation(){
     UINavigationBar.appearance().isTranslucent = false
     //    UIApplication.shared.statusBarView?.backgroundColor = Constants.RGBColorCodes.defaultBlueColor
     UINavigationBar.appearance().titleTextAttributes =
-        [NSAttributedStringKey.foregroundColor: UIColor.white,
-         NSAttributedStringKey.font: UIFont(name: .fontOpenSansRegular, size: 20)!]
+        [NSAttributedString.Key.foregroundColor: UIColor.white,
+         NSAttributedString.Key.font: UIFont(name: .fontOpenSansRegular, size: 20)!]
 }
 
 // MARK: - Set TabBarController NavigationBar Methods
 
 func setTabBarControllerNavigationBar(viewController : UIViewController, strTitleName : String) {
     
-    let titleDict: NSDictionary = [NSAttributedStringKey.foregroundColor: UIColor.whiteColor]
-    viewController.tabBarController?.navigationController?.navigationBar.titleTextAttributes = titleDict as? [NSAttributedStringKey : Any]
+    let titleDict: NSDictionary = [NSAttributedString.Key.foregroundColor: UIColor.whiteColor]
+    viewController.tabBarController?.navigationController?.navigationBar.titleTextAttributes = titleDict as? [NSAttributedString.Key : Any]
     
     viewController.tabBarController?.navigationItem.backBarButtonItem = UIBarButtonItem(title:"", style:.plain, target:nil, action:nil)
 

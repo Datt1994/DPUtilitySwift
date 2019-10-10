@@ -42,6 +42,18 @@ struct Constants {
     static let appName    = Bundle.main.infoDictionary!["CFBundleName"] as! String
     static let mainStoryboard = UIStoryboard(name: "Main", bundle: nil)
     static let appDelegate = UIApplication.shared.delegate as! AppDelegate
+    static var keyWindow : UIWindow? {
+           if #available(iOS 13.0, *) {
+           return  UIApplication.shared.connectedScenes
+               .filter({$0.activationState == .foregroundActive})
+               .map({$0 as? UIWindowScene})
+               .compactMap({$0})
+               .first?.windows
+               .filter({$0.isKeyWindow}).first
+           } else {
+               return UIApplication.shared.keyWindow
+           }
+       }
     
     //MARK: - device type
     enum UIUserInterfaceIdiom : Int{
